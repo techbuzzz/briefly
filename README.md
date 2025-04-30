@@ -8,12 +8,13 @@ Powered by **Azure OpenAI (GPT-4o)** and **Azure Cognitive Services (Text-to-Spe
 
 ## ✨ Features (Planned and Ongoing)
 
-- ✅ Collect updates from team members via Microsoft Forms or API
-- ✅ Store and filter data in SharePoint Online or Supabase
-- ✅ Trigger digest generation with Power Automate or schedule it
-- ✅ Use Azure Function + GPT-4o to generate structured HTML digests
-- ✅ Generate 600-character summary for voice conversion
-- ✅ Use Azure Text-to-Speech to produce a short internal podcast
+- 🛠️ Collect updates from team members via UI and WebHooks (Microsoft Forms or API)
+- 🛠️ Store and filter data in Supabase
+- 🛠️ Store and filter data in SharePoint Online
+- 🛠️ Trigger digest generation with Power Automate or schedule it
+- 🛠️ Use Azure Function + GPT-4o to generate structured HTML digests
+- 🛠️ Generate summary for voice conversion
+- 🛠️ Use Azure Text-to-Speech to produce a short internal podcast
 - 🛠️ Web dashboard to submit and browse team updates
 - 🛠️ Categorized sections in digest: Highlights, Dev, QA, Risks
 - 🛠️ Mood analysis and emoji indicator for the team state
