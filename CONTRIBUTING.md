@@ -48,7 +48,7 @@ If possible, test your changes locally or via Azure Function emulator. Leave tes
 
 ## 💡 Need Help?
 
-Open an [Issue](https://github.com/briefly/briefly/issues) or start a [Discussion](https://github.com/briefly/briefly/discussions) — we’re here to help!
+Open an [Issue](https://github.com/techbuzzz/briefly/issues) or start a [Discussion](https://github.com/techbuzzz/briefly/discussions) — we’re here to help!
 
 ---
 
