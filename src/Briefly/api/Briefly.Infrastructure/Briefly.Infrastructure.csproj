@@ -29,9 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\migrations\Briefly.Migrations\Briefly.Migrations.csproj" />
-    <ProjectReference Include="..\..\modules\Notes\Notes.Application\Notes.Application.csproj" />
-    <ProjectReference Include="..\..\modules\Notes\Notes.Infrastructure\Notes.Infrastructure.csproj" />
+    <ProjectReference Include="..\Briefly.Core\Briefly.Core.csproj" />
   </ItemGroup>
 
 </Project>

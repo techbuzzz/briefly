@@ -1,13 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-using Notes.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Notes.Application.Domain;
 
-namespace Notes.Infrastructure.Persistence
+namespace Notes.Application.Persistence
 {
     public class NoteTypeConfiguration : IEntityTypeConfiguration<NoteType>
     {

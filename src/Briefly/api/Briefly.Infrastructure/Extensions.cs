@@ -1,15 +1,14 @@
 ﻿using System.Text.Json;
-using Briefly.Migrations;
+using Briefly.Core.Persistence;
+using Briefly.Infrastructure.Persistence;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Notes.Application;
-using Notes.Infrastructure;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
 
@@ -20,27 +19,34 @@ public static class Extensions
     public static WebApplicationBuilder ConfigureBrieflyInfrastructure(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        builder.Services.AddFastEndpoints(options =>
-        {
-            options.Assemblies = [typeof(NotesApplicationModuleMetaData).Assembly];
-        });
+        //builder.Services.AddFastEndpoints(options =>
+        //{
+        //    options.Assemblies = [typeof(AppMetaData).Assembly];
+        //});
 
         var pgConnectionString = builder.Configuration.GetConnectionString("briefly-platform-db");
         var cacheConnectionString = builder.Configuration.GetConnectionString("briefly-platform-cache");
+        //builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("DatabaseOptions"));
 
         if (string.IsNullOrEmpty(pgConnectionString))
             throw new Exception("PostgreSQL connection string is not configured.");
         //if (string.IsNullOrEmpty(cacheConnectionString))
         //    throw new Exception("Redis connection string is not configured.");
 
-        // Configure Entity Framework Core with PostgreSQL
-        builder.Services.AddDbContext<NotesDbContext>(options =>
-            options.UseNpgsql(pgConnectionString, b => b.MigrationsAssembly(typeof(MigrationsMetaData).Assembly.GetName().Name)));
 
-        builder.Services.AddStackExchangeRedisCache(options =>
+        builder.Services.Configure<DatabaseOptions>(options =>
         {
-            options.Configuration = builder.Configuration.GetConnectionString("vnt-platform-cache");
+            builder.Configuration.GetSection("DatabaseOptions").Bind(options);
+            options.ConnectionString = pgConnectionString; // Set the PostgreSQL connection string
         });
+
+        // Configure Entity Framework Core with PostgreSQL
+        // builder.Services.AddDbContext<NotesDbContext>(options =>
+        //     options.UseNpgsql(pgConnectionString, b => b.MigrationsAssembly(typeof(MigrationsMetaData).Assembly.GetName().Name)));
+
+        // Configure Entity Framework Core with DB Server
+        builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = cacheConnectionString; });
+        // Configure FusionCache with Redis
         builder.Services.AddFusionCache().AsHybridCache()
             .WithDefaultEntryOptions(new FusionCacheEntryOptions
             {
@@ -74,7 +80,7 @@ public static class Extensions
         return builder;
     }
 
-    public static WebApplication UseBrieflyFramework(this WebApplication app)
+    public static async Task<WebApplication> UseBrieflyFramework(this WebApplication app)
     {
         app.UseFastEndpoints(c =>
         {
@@ -98,10 +104,17 @@ public static class Extensions
         });
 
         // Apply pending migrations automatically
+        // using (var scope = app.Services.CreateScope())
+        // {
+        //     var dbContext = scope.ServiceProvider.GetRequiredService<NotesDbContext>();
+        //     dbContext.Database.Migrate();
+        // }
+
+        // Resolve and invoke IDbInitializer to apply migrations
         using (var scope = app.Services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<NotesDbContext>();
-            dbContext.Database.Migrate();
+            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+            await dbInitializer.MigrateAsync(CancellationToken.None);
         }
 
         return app;

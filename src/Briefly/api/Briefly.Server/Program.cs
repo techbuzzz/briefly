@@ -1,4 +1,4 @@
-
+using Briefly.Core.Persistence;
 using Briefly.Infrastructure;
 using Briefly.Infrastructure.Logging.Serilog;
 using Serilog;
@@ -22,9 +22,12 @@ public class Program
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.ConfigureBrieflyInfrastructure();
-
+            builder.RegisterModules();
             var app = builder.Build();
-            app.UseBrieflyFramework();
+
+            await app.UseBrieflyFramework();
+            app.UseModules();
+
             await app.RunAsync();
         }
         catch (Exception ex) when (!ex.GetType().Name.Equals("HostAbortedException", StringComparison.Ordinal))

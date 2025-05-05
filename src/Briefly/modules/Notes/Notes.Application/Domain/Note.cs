@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Briefly.Core.Domain;
 
-namespace Notes.Domain
+namespace Notes.Application.Domain
 {
     public class Note : AuditableEntity, IAggregateRoot
     {

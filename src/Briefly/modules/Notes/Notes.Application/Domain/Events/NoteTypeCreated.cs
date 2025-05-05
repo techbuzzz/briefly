@@ -1,6 +1,6 @@
 ﻿using Briefly.Core.Domain;
 
-namespace Notes.Domain.Events;
+namespace Notes.Application.Domain.Events;
 
 public record NoteTypeCreated : DomainEvent
 {

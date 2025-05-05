@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
-using Notes.Domain;
-using Notes.Domain.Events;
-using Notes.Infrastructure;
+using Notes.Application.Domain;
+using Notes.Application.Domain.Events;
+using Notes.Application.Persistence;
 
 namespace Notes.Application.NotesTypes;
 

@@ -1,8 +1,6 @@
 ﻿using Briefly.Core.Domain;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Notes.Domain;
+namespace Notes.Application.Domain;
 
 public class NoteType : AuditableEntity, IAggregateRoot
 {
