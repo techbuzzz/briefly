@@ -1,4 +1,5 @@
 ﻿using Briefly.Core.Persistence;
+using Briefly.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -30,6 +31,7 @@ public static class Extensions
             {
                 Logger.Information("Configuring database with connection string: {ConnectionString}", config.ConnectionString);
             });
+
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditInterceptor>();
 
         return builder;

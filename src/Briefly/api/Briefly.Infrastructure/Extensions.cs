@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Briefly.Core.Audit;
 using Briefly.Core.Persistence;
 using Briefly.Infrastructure.Persistence;
 using FastEndpoints;
@@ -32,6 +33,8 @@ public static class Extensions
             throw new Exception("PostgreSQL connection string is not configured.");
         //if (string.IsNullOrEmpty(cacheConnectionString))
         //    throw new Exception("Redis connection string is not configured.");
+
+        // builder.Services.AddTransient<IAuditService, AuditService>();
 
 
         builder.Services.Configure<DatabaseOptions>(options =>

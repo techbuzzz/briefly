@@ -18,10 +18,10 @@ public static class NotesModuleInitializer
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.BindDbContext<NotesDbContext>();
         builder.Services.AddScoped<IDbInitializer, NotesDbInitializer>();
-        builder.Services.AddKeyedScoped<IRepository<NoteType>, NotesRepository<NoteType>>("module:notes");
-        builder.Services.AddKeyedScoped<IReadRepository<NoteType>, NotesRepository<NoteType>>("module:notes");
-        builder.Services.AddKeyedScoped<IRepository<Note>, NotesRepository<Note>>("module:notes");
-        builder.Services.AddKeyedScoped<IReadRepository<Note>, NotesRepository<Note>>("module:notes");
+        builder.Services.AddKeyedScoped<IRepository<NoteType>, NotesRepository<NoteType>>(NotesMetadata.DIKey);
+        builder.Services.AddKeyedScoped<IReadRepository<NoteType>, NotesRepository<NoteType>>(NotesMetadata.DIKey);
+        builder.Services.AddKeyedScoped<IRepository<Note>, NotesRepository<Note>>(NotesMetadata.DIKey);
+        builder.Services.AddKeyedScoped<IReadRepository<Note>, NotesRepository<Note>>(NotesMetadata.DIKey);
 
         builder.Services.AddFastEndpoints(options =>
         {
