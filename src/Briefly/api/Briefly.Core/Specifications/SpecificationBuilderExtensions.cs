@@ -2,6 +2,8 @@
 using System.Reflection;
 using System.Text.Json;
 using Ardalis.Specification;
+using Briefly.Core.Exceptions;
+using Briefly.Core.Paging;
 
 namespace Briefly.Core.Specifications;
 

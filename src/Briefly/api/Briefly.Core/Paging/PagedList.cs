@@ -1,4 +1,6 @@
-﻿namespace Briefly.Core.Paging;
+﻿using Mapster;
+
+namespace Briefly.Core.Paging;
 
 public record PagedList<T>(IReadOnlyList<T> Items, int PageNumber, int PageSize, int TotalCount) : IPagedList<T>
     where T : class
