@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\api\Briefly.Server\Briefly.Server.csproj" />
+    <ProjectReference Include="..\app\Briefly.Client\Briefly.Client.csproj" />
   </ItemGroup>
 
 </Project>

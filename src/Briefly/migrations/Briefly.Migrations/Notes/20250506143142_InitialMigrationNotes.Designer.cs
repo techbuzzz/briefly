@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Briefly.Migrations.Notes;
 using Notes.Application.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -14,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Briefly.Migrations.Notes
 {
     [DbContext(typeof(NotesDbContext))]
-    [Migration("20250430155454_Initial migration")]
-    partial class Initialmigration
+    [Migration("20250506143142_InitialMigrationNotes")]
+    partial class InitialMigrationNotes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,19 +27,11 @@ namespace Briefly.Migrations.Notes
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Notes.Domain.Note", b =>
+            modelBuilder.Entity("Notes.Application.Domain.Note", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("AuthorEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
@@ -53,8 +44,9 @@ namespace Briefly.Migrations.Notes
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<JsonDocument>("CustomFields")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<DateTimeOffset?>("Deleted")
                         .HasColumnType("timestamp with time zone");
@@ -62,32 +54,14 @@ namespace Briefly.Migrations.Notes
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Energy")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Feeling")
-                        .HasColumnType("text");
-
-                    b.Property<string>("HtmlContent")
-                        .HasColumnType("text");
-
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Mood")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("NoteTypeId")
                         .HasColumnType("uuid");
-
-                    b.Property<JsonDocument>("RawData")
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -96,7 +70,65 @@ namespace Briefly.Migrations.Notes
                     b.ToTable("notes", "note");
                 });
 
-            modelBuilder.Entity("Notes.Domain.NoteType", b =>
+            modelBuilder.Entity("Notes.Application.Domain.NoteFieldDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DataType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FieldKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("NoteTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NoteTypeId");
+
+                    b.ToTable("note_field_definitions", "note");
+                });
+
+            modelBuilder.Entity("Notes.Application.Domain.NoteFieldOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FieldDefinitionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FieldDefinitionId");
+
+                    b.ToTable("note_field_options", "note");
+                });
+
+            modelBuilder.Entity("Notes.Application.Domain.NoteType", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -137,9 +169,9 @@ namespace Briefly.Migrations.Notes
                     b.ToTable("note_types", "note");
                 });
 
-            modelBuilder.Entity("Notes.Domain.Note", b =>
+            modelBuilder.Entity("Notes.Application.Domain.Note", b =>
                 {
-                    b.HasOne("Notes.Domain.NoteType", "NoteType")
+                    b.HasOne("Notes.Application.Domain.NoteType", "NoteType")
                         .WithMany("Notes")
                         .HasForeignKey("NoteTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -148,8 +180,33 @@ namespace Briefly.Migrations.Notes
                     b.Navigation("NoteType");
                 });
 
-            modelBuilder.Entity("Notes.Domain.NoteType", b =>
+            modelBuilder.Entity("Notes.Application.Domain.NoteFieldDefinition", b =>
                 {
+                    b.HasOne("Notes.Application.Domain.NoteType", null)
+                        .WithMany("FieldDefinitions")
+                        .HasForeignKey("NoteTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Notes.Application.Domain.NoteFieldOption", b =>
+                {
+                    b.HasOne("Notes.Application.Domain.NoteFieldDefinition", null)
+                        .WithMany("Options")
+                        .HasForeignKey("FieldDefinitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Notes.Application.Domain.NoteFieldDefinition", b =>
+                {
+                    b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("Notes.Application.Domain.NoteType", b =>
+                {
+                    b.Navigation("FieldDefinitions");
+
                     b.Navigation("Notes");
                 });
 #pragma warning restore 612, 618

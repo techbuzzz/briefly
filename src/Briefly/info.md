@@ -7,7 +7,9 @@ To add a migration for the `NotesDbContext`, use the following command:
 ```bash
 dotnet ef migrations add "Initial migration" --project ..\migrations\Briefly.Migrations --context NotesDbContext -o Notes
 ```
-
+C:\Work\sources\Anetlab\briefly\src\Briefly (develop -> origin)
+λ dotnet ef migrations add InitialMigrationNotes --project migrations/Briefly.Migrations/Briefly.Migrations.csproj --startup-project api/Briefly.Server/Briefly.Server.csproj -o Notes
+Build started...
 
 ### Explanation of the Command:
 - **`add "Initial migration"`**: Adds a new migration named "Initial migration".

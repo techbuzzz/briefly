@@ -1,0 +1,13 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider>
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+    <MudAppBar Color="Color.Primary">
+        <MudText Typo="Typo.h6">Briefly Dashboard</MudText>
+    </MudAppBar>
+
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+        @Body
+    </MudContainer>
+</MudThemeProvider>

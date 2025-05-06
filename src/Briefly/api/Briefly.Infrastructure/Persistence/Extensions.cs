@@ -16,8 +16,17 @@ public static class Extensions
         string connectionString)
     {
         builder.ConfigureWarnings(warnings => warnings.Log(RelationalEventId.PendingModelChangesWarning));
+#if DEBUG
+
         builder.UseNpgsql(connectionString, e =>
             e.MigrationsAssembly("Briefly.Migrations")).EnableSensitiveDataLogging();
+#endif
+
+#if !DEBUG
+        builder.UseNpgsql(connectionString, e =>
+                    e.MigrationsAssembly("Briefly.Migrations"));
+#endif
+
 
         return builder;
     }

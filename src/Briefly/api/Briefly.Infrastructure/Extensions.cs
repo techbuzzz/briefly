@@ -83,6 +83,8 @@ public static class Extensions
 
     public static async Task<WebApplication> UseBrieflyFramework(this WebApplication app)
     {
+        ArgumentNullException.ThrowIfNull(app);
+
         app.UseFastEndpoints(c =>
         {
             c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
@@ -104,6 +106,9 @@ public static class Extensions
             c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
         });
 
+
+        app.SetupDatabases();
+
         // Apply pending migrations automatically
         // using (var scope = app.Services.CreateScope())
         // {
@@ -112,12 +117,24 @@ public static class Extensions
         // }
 
         // Resolve and invoke IDbInitializer to apply migrations
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-            await dbInitializer.MigrateAsync(CancellationToken.None);
-        }
+        // using (var scope = app.Services.CreateScope())
+        // {
+        //     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        //     await dbInitializer.MigrateAsync(CancellationToken.None);
+        // }
 
         return app;
+    }
+
+    private static void SetupDatabases(this IApplicationBuilder app)
+    {
+        using var scope = app.ApplicationServices.CreateScope();
+        
+        var initializers = scope.ServiceProvider.GetServices<IDbInitializer>();
+        foreach (var initializer in initializers)
+        {
+            initializer.MigrateAsync(CancellationToken.None).Wait();
+            initializer.SeedAsync(CancellationToken.None).Wait();
+        }
     }
 }
