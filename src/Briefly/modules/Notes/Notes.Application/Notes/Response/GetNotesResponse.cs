@@ -1,3 +1,5 @@
+using Notes.Application.Dto;
+
 namespace Notes.Application.Notes.Response;
 
 public record GetNotesResponse

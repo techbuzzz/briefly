@@ -6,6 +6,7 @@ using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
+using Notes.Application.Dto;
 
 namespace Notes.Application.Notes.GetList;
 
@@ -24,21 +25,14 @@ public class GetNoteListEndpoint(
     public override async Task HandleAsync(GetNoteListRequest req, CancellationToken ct)
     {
         // Define projection for Note to NoteDto
-        Expression<Func<Note, NoteDto>> selector = n => new NoteDto
-        {
-            Id = n.Id,
-            AuthorName = n.AuthorName,
-            AuthorEmail = n.AuthorEmail,
-            NoteTypeId = n.NoteTypeId,
-            NoteTypeName = n.NoteType.Name,
-            Date = n.Date,
-            Mood = n.Mood,
-            Energy = n.Energy,
-            Summary = n.Summary,
-            CreatedAt = n.CreatedAt
-        };
+        // Expression<Func<Note, NoteDto>> selector = n => new NoteDto
+        // {
+        //     Id = n.Id,
+        //     NoteTypeId = n.NoteTypeId,
+        //     CustomFields = n.CustomFields,
+        //     CreatedAt = n.CreatedAt
+        // };
 
-        // var spec = new NotesByPaginationFilterSpec<Note, NoteDto>(req);
         // Create specification with filtering and projection
         var spec = new EntitiesByPaginationFilterSpec<Note, NoteDto>(req);
 

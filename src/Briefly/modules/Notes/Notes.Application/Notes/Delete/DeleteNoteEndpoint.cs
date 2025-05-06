@@ -33,7 +33,7 @@ public class DeleteNoteEndpoint(
         note.QueueDomainEvent(new NoteDeleted
         {
             NoteId = note.Id,
-            AuthorName = note.AuthorName
+            // AuthorName = note.AuthorName
         });
 
         // Delete entity

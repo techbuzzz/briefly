@@ -34,17 +34,17 @@ public class GetNoteEndpoint(
         var response = new GetNoteResponse
         {
             Id = note.Id,
-            AuthorName = note.AuthorName,
-            AuthorEmail = note.AuthorEmail,
+            // AuthorName = note.AuthorName,
+            // AuthorEmail = note.AuthorEmail,
             NoteTypeId = note.NoteTypeId,
             NoteTypeName = note.NoteTypeName,
-            Date = note.Date,
-            Mood = note.Mood,
-            Energy = note.Energy,
-            Feeling = note.Feeling,
-            Summary = note.Summary,
-            HtmlContent = note.HtmlContent,
-            RawData = note.RawData,
+            // Date = note.Date,
+            // Mood = note.Mood,
+            // Energy = note.Energy,
+            // Feeling = note.Feeling,
+            // Summary = note.Summary,
+            // HtmlContent = note.HtmlContent,
+            // RawData = note.RawData,
             CreatedAt = note.CreatedAt
         };
 

@@ -6,6 +6,7 @@ using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
+using Notes.Application.Dto;
 
 namespace Notes.Application.NotesTypes.GetList;
 

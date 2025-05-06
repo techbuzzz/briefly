@@ -35,16 +35,16 @@ public class CreateNoteEndpoint(
         var note = new Note
         {
             Id = Guid.NewGuid(),
-            AuthorName = req.AuthorName,
-            AuthorEmail = req.AuthorEmail,
+            // AuthorName = req.AuthorName,
+            // AuthorEmail = req.AuthorEmail,
             NoteTypeId = req.NoteTypeId,
-            Date = req.Date,
-            Mood = req.Mood,
-            Energy = req.Energy,
-            Feeling = req.Feeling,
-            Summary = req.Summary,
-            HtmlContent = req.HtmlContent,
-            RawData = req.RawData,
+            // Date = req.Date,
+            // Mood = req.Mood,
+            // Energy = req.Energy,
+            // Feeling = req.Feeling,
+            // Summary = req.Summary,
+            // HtmlContent = req.HtmlContent,
+            // RawData = req.RawData,
             CreatedAt = DateTime.UtcNow
         };
 

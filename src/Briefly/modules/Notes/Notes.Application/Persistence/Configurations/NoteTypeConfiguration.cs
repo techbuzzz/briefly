@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Notes.Application.Domain;
 
-namespace Notes.Application.Persistence;
+namespace Notes.Application.Persistence.Configurations;
 
 public class NoteTypeConfiguration : IEntityTypeConfiguration<NoteType>
 {
@@ -16,6 +16,10 @@ public class NoteTypeConfiguration : IEntityTypeConfiguration<NoteType>
         builder.HasMany(x => x.Notes)
             .WithOne(x => x.NoteType)
             .HasForeignKey(x => x.NoteTypeId);
+        builder.HasMany(x => x.FieldDefinitions)
+            .WithOne()
+            .HasForeignKey(fd => fd.NoteTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
         //builder.HasIndex(x => x.Name).IsUnique();
         //builder.HasIndex(x => x.IsActive);
         //builder.HasIndex(x => x.CreatedAt);

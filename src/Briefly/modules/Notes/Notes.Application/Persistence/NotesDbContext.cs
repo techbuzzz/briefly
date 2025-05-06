@@ -14,6 +14,8 @@ public class NotesDbContext : DbContext
 
     public DbSet<Note> Notes => Set<Note>();
     public DbSet<NoteType> NoteTypes => Set<NoteType>();
+    public DbSet<NoteFieldDefinition> FieldDefinitions => Set<NoteFieldDefinition>();
+    public DbSet<NoteFieldOption> FieldOptions => Set<NoteFieldOption>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

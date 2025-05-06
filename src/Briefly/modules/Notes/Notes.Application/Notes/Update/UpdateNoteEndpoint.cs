@@ -24,13 +24,13 @@ public class UpdateNoteEndpoint(
     public override async Task HandleAsync(UpdateNoteRequest req, CancellationToken ct)
     {
         // Verify NoteType exists
-        var noteType = await noteTypeRepository.GetByIdAsync(req.NoteTypeId, ct);
-        if (noteType is null)
-        {
-            AddError("NoteTypeId", "Note type not found");
-            await SendErrorsAsync(cancellation: ct);
-            return;
-        }
+        // var noteType = await noteTypeRepository.GetByIdAsync(req.NoteTypeId, ct);
+        // if (noteType is null)
+        // {
+        //     AddError("NoteTypeId", "Note type not found");
+        //     await SendErrorsAsync(cancellation: ct);
+        //     return;
+        // }
 
         var note = await repository.GetByIdAsync(req.Id, ct);
         if (note is null)
@@ -39,17 +39,23 @@ public class UpdateNoteEndpoint(
             return;
         }
 
+        // // Update custom fields if provided
+        // if (req. is not null)
+        // {
+        //     note.CustomFields = req.CustomFields;
+        // }
+
         // Update properties
-        note.AuthorName = req.AuthorName;
-        note.AuthorEmail = req.AuthorEmail;
-        note.NoteTypeId = req.NoteTypeId;
-        note.Date = req.Date;
-        note.Mood = req.Mood;
-        note.Energy = req.Energy;
-        note.Feeling = req.Feeling;
-        note.Summary = req.Summary;
-        note.HtmlContent = req.HtmlContent;
-        note.RawData = req.RawData;
+        // note.AuthorName = req.AuthorName;
+        // note.AuthorEmail = req.AuthorEmail;
+        // note.NoteTypeId = req.NoteTypeId;
+        // note.Date = req.Date;
+        // note.Mood = req.Mood;
+        // note.Energy = req.Energy;
+        // note.Feeling = req.Feeling;
+        // note.Summary = req.Summary;
+        // note.HtmlContent = req.HtmlContent;
+        // note.RawData = req.RawData;
 
         // Queue domain event
         note.QueueDomainEvent(new NoteUpdated { Note = note });
