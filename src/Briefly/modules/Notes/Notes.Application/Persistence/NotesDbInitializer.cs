@@ -8,7 +8,9 @@ public sealed class NotesDbInitializer(ILogger<NotesDbInitializer> logger, Notes
 {
     public async Task MigrateAsync(CancellationToken cancellationToken)
     {
-        if ((await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)).Any())
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync(cancellationToken).ConfigureAwait(false);
+        var allMigrations = await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false);
+        if ((allMigrations).Any())
         {
             await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             logger.LogInformation("Applied database migrations for Note module");
