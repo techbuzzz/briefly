@@ -11,6 +11,7 @@ using Notes.Application.Domain;
 using Notes.Application.Persistence;
 
 namespace Notes.Application;
+
 public static class NotesModuleInitializer
 {
     public static WebApplicationBuilder RegisterNotesServices(this WebApplicationBuilder builder)
@@ -30,6 +31,7 @@ public static class NotesModuleInitializer
 
         return builder;
     }
+
     public static WebApplication UseNotesModule(this WebApplication app)
     {
         return app;
@@ -47,9 +49,11 @@ internal sealed class NotesRepository<T> : RepositoryBase<T>, IReadRepository<T>
     // We override the default behavior when mapping to a dto.
     // We're using Mapster's ProjectToType here to immediately map the result from the database.
     // This is only done when no Selector is defined, so regular specifications with a selector also still work.
-    protected override IQueryable<TResult> ApplySpecification<TResult>(ISpecification<T, TResult> specification) =>
-        specification.Selector is not null
+    protected override IQueryable<TResult> ApplySpecification<TResult>(ISpecification<T, TResult> specification)
+    {
+        return specification.Selector is not null
             ? base.ApplySpecification(specification)
             : ApplySpecification(specification, false)
                 .ProjectToType<TResult>();
+    }
 }

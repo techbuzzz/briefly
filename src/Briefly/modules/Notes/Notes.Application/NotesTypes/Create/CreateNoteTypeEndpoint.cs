@@ -4,20 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
 using Notes.Application.Domain.Events;
-using Notes.Application.Persistence;
 
 namespace Notes.Application.NotesTypes.Create;
 
 public class CreateNoteTypeEndpoint(
     ILogger<CreateNoteTypeEndpoint> logger,
-    [FromKeyedServices(NotesMetadata.DIKey)] IRepository<NoteType> repository) : Endpoint<CreateNoteTypeRequest, Guid>
+    [FromKeyedServices(NotesMetadata.DIKey)]
+    IRepository<NoteType> repository) : Endpoint<CreateNoteTypeRequest, Guid>
 {
     // private readonly NotesDbContext _db;
 
     // public CreateNoteTypeEndpoint(IRepository<NoteType> repository)
     // {
 
-        // _db = db;
+    // _db = db;
     // }
 
     public override void Configure()
@@ -41,8 +41,7 @@ public class CreateNoteTypeEndpoint(
         await repository.SaveChangesAsync(ct).ConfigureAwait(false);
         logger.LogInformation("note type item created {NoteTypeItemId}", item.Id);
 
-        await SendAsync(item.Id, cancellation:ct);
+        await SendAsync(item.Id, cancellation: ct);
         // return new CreateTodoResponse(item.Id);
-
     }
 }

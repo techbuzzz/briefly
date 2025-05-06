@@ -4,14 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
 using Notes.Application.Domain.Events;
-using Notes.Application.Persistence;
 
 namespace Notes.Application.Notes.Update;
 
 public class UpdateNoteEndpoint(
     ILogger<UpdateNoteEndpoint> logger,
-    [FromKeyedServices(NotesMetadata.DIKey)] IRepository<Note> repository,
-    [FromKeyedServices(NotesMetadata.DIKey)] IRepository<NoteType> noteTypeRepository)
+    [FromKeyedServices(NotesMetadata.DIKey)]
+    IRepository<Note> repository,
+    [FromKeyedServices(NotesMetadata.DIKey)]
+    IRepository<NoteType> noteTypeRepository)
     : Endpoint<UpdateNoteRequest, Guid>
 {
     public override void Configure()
@@ -49,16 +50,16 @@ public class UpdateNoteEndpoint(
         note.Summary = req.Summary;
         note.HtmlContent = req.HtmlContent;
         note.RawData = req.RawData;
-        
+
         // Queue domain event
         note.QueueDomainEvent(new NoteUpdated { Note = note });
-        
+
         // Save changes
         await repository.UpdateAsync(note, ct);
         await repository.SaveChangesAsync(ct);
-        
+
         logger.LogInformation("Note updated {NoteId}", note.Id);
-        
+
         await SendAsync(note.Id, cancellation: ct);
     }
 }

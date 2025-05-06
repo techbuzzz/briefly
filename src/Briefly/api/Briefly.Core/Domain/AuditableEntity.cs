@@ -12,5 +12,8 @@ public class AuditableEntity<TId> : BaseEntity<TId>, IAuditable, ISoftDeletable
 
 public abstract class AuditableEntity : AuditableEntity<Guid>
 {
-    protected AuditableEntity() => Id = Guid.NewGuid();
+    protected AuditableEntity()
+    {
+        Id = Guid.NewGuid();
+    }
 }

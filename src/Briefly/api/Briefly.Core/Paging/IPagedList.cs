@@ -13,6 +13,7 @@ public interface IPagedList<T>
 
     IPagedList<TR> MapTo<TR>(Func<T, TR> map)
         where TR : class;
+
     IPagedList<TR> MapTo<TR>()
-       where TR : class;
+        where TR : class;
 }

@@ -2,6 +2,7 @@
 using System.Net;
 
 namespace Briefly.Core.Exceptions;
+
 public class NotFoundException : BrieflyException
 {
     public NotFoundException(string message)

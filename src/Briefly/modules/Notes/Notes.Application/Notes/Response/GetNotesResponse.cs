@@ -1,6 +1,3 @@
-using System.Text.Json;
-using Briefly.Core.Paging;
-
 namespace Notes.Application.Notes.Response;
 
 public record GetNotesResponse

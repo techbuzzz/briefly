@@ -1,5 +1,3 @@
-using Briefly.Core.Paging;
-
 namespace Notes.Application.NotesTypes.Responses;
 
 public record GetNoteTypesResponse

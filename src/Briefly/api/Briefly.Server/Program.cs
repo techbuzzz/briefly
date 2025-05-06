@@ -1,4 +1,3 @@
-using Briefly.Core.Persistence;
 using Briefly.Infrastructure;
 using Briefly.Infrastructure.Logging.Serilog;
 using Serilog;
@@ -41,6 +40,5 @@ public class Program
             Log.Information("server shutting down..");
             await Log.CloseAndFlushAsync();
         }
-        
     }
 }

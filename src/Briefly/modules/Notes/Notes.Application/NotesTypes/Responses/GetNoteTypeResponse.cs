@@ -1,5 +1,3 @@
-using Notes.Application.Domain;
-
 namespace Notes.Application.NotesTypes.Responses;
 
 public record GetNoteTypeResponse

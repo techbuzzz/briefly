@@ -2,8 +2,14 @@
 using System.Text.Json;
 
 namespace Briefly.Core.Audit;
-public class TrailDto()
+
+public class TrailDto
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = false
+    };
+
     public Guid Id { get; set; }
     public DateTimeOffset DateTime { get; set; }
     public Guid UserId { get; set; }
@@ -14,14 +20,9 @@ public class TrailDto()
     public TrailType Type { get; set; }
     public string? TableName { get; set; }
 
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        WriteIndented = false,
-    };
-
     public AuditTrail ToAuditTrail()
     {
-        return new()
+        return new AuditTrail
         {
             Id = Guid.NewGuid(),
             UserId = UserId,
@@ -31,7 +32,9 @@ public class TrailDto()
             PrimaryKey = JsonSerializer.Serialize(KeyValues, SerializerOptions),
             PreviousValues = OldValues.Count == 0 ? null : JsonSerializer.Serialize(OldValues, SerializerOptions),
             NewValues = NewValues.Count == 0 ? null : JsonSerializer.Serialize(NewValues, SerializerOptions),
-            ModifiedProperties = ModifiedProperties.Count == 0 ? null : JsonSerializer.Serialize(ModifiedProperties, SerializerOptions)
+            ModifiedProperties = ModifiedProperties.Count == 0
+                ? null
+                : JsonSerializer.Serialize(ModifiedProperties, SerializerOptions)
         };
     }
 }

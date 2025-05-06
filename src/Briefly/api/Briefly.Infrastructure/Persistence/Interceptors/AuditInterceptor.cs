@@ -6,20 +6,23 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Briefly.Infrastructure.Persistence.Interceptors;
+
 public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
-
-    public override ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken cancellationToken = default)
+    public override ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result,
+        CancellationToken cancellationToken = default)
     {
         return base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
-    public override Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default)
+    public override Task SaveChangesFailedAsync(DbContextErrorEventData eventData,
+        CancellationToken cancellationToken = default)
     {
         return base.SaveChangesFailedAsync(eventData, cancellationToken);
     }
 
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
+        InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
         UpdateEntities(eventData.Context);
         await PublishAuditTrailsAsync(eventData);
@@ -32,12 +35,13 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
         eventData.Context.ChangeTracker.DetectChanges();
         var trails = new List<TrailDto>();
         var utcNow = timeProvider.GetUtcNow();
-        foreach (var entry in eventData.Context.ChangeTracker.Entries<IAuditable>().Where(x => x.State is EntityState.Added or EntityState.Deleted or EntityState.Modified).ToList())
+        foreach (var entry in eventData.Context.ChangeTracker.Entries<IAuditable>()
+                     .Where(x => x.State is EntityState.Added or EntityState.Deleted or EntityState.Modified).ToList())
         {
             // var userId = currentUser.GetUserId();
             var userId = Guid.Empty; // Placeholder for user ID retrieval
 
-            var trail = new TrailDto()
+            var trail = new TrailDto
             {
                 Id = Guid.NewGuid(),
                 TableName = entry.Entity.GetType().Name,
@@ -47,11 +51,8 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
 
             foreach (var property in entry.Properties)
             {
-                if (property.IsTemporary)
-                {
-                    continue;
-                }
-                string propertyName = property.Metadata.Name;
+                if (property.IsTemporary) continue;
+                var propertyName = property.Metadata.Name;
                 if (property.Metadata.IsPrimaryKey())
                 {
                     trail.KeyValues[propertyName] = property.CurrentValue;
@@ -73,7 +74,8 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
                     case EntityState.Modified:
                         if (property.IsModified)
                         {
-                            if (entry.Entity is ISoftDeletable && property.OriginalValue == null && property.CurrentValue != null)
+                            if (entry.Entity is ISoftDeletable && property.OriginalValue == null &&
+                                property.CurrentValue != null)
                             {
                                 trail.ModifiedProperties.Add(propertyName);
                                 trail.Type = TrailType.Delete;
@@ -92,18 +94,17 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
                                 property.IsModified = false;
                             }
                         }
+
                         break;
                 }
             }
 
             trails.Add(trail);
         }
+
         if (trails.Count == 0) return;
         var auditTrails = new Collection<AuditTrail>();
-        foreach (var trail in trails)
-        {
-            auditTrails.Add(trail.ToAuditTrail());
-        }
+        foreach (var trail in trails) auditTrails.Add(trail.ToAuditTrail());
         // await auditTrailRepository.AddRangeAsync(auditTrails);
     }
 
@@ -122,10 +123,12 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
                     entry.Entity.CreatedBy = currentUser;
                     entry.Entity.Created = utcNow;
                 }
+
                 entry.Entity.LastModifiedBy = currentUser;
                 entry.Entity.LastModified = utcNow;
             }
-            if(entry.State is EntityState.Deleted && entry.Entity is ISoftDeletable softDelete)
+
+            if (entry.State is EntityState.Deleted && entry.Entity is ISoftDeletable softDelete)
             {
                 softDelete.DeletedBy = currentUser;
                 softDelete.Deleted = utcNow;
@@ -137,9 +140,11 @@ public class AuditInterceptor(TimeProvider timeProvider) : SaveChangesIntercepto
 
 public static class Extensions
 {
-    public static bool HasChangedOwnedEntities(this EntityEntry entry) =>
-        entry.References.Any(r =>
+    public static bool HasChangedOwnedEntities(this EntityEntry entry)
+    {
+        return entry.References.Any(r =>
             r.TargetEntry != null &&
             r.TargetEntry.Metadata.IsOwned() &&
             (r.TargetEntry.State == EntityState.Added || r.TargetEntry.State == EntityState.Modified));
+    }
 }

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Briefly.Migrations;
 
-namespace Briefly.Migrations
+public class MigrationsMetaData
 {
-    public class MigrationsMetaData
-    {
-    }
 }

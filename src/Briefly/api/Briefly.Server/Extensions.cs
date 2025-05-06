@@ -1,6 +1,5 @@
-﻿using Notes.Application;
-using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
+using Notes.Application;
 
 namespace Briefly.Server;
 
@@ -11,7 +10,7 @@ public static class Extensions
         ArgumentNullException.ThrowIfNull(builder);
 
         //define module assemblies
-        var assemblies = new Assembly[]
+        var assemblies = new[]
         {
             typeof(NotesMetadata).Assembly
         };

@@ -4,13 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
 using Notes.Application.NotesTypes.Responses;
-using Notes.Application.Persistence;
 
 namespace Notes.Application.NotesTypes.Get;
 
 public class GetNoteTypeEndpoint(
     ILogger<GetNoteTypeEndpoint> logger,
-    [FromKeyedServices(NotesMetadata.DIKey)] IRepository<NoteType> repository) 
+    [FromKeyedServices(NotesMetadata.DIKey)]
+    IRepository<NoteType> repository)
     : Endpoint<GetNoteTypeRequest, GetNoteTypeResponse>
 {
     public override void Configure()
@@ -22,7 +22,7 @@ public class GetNoteTypeEndpoint(
     public override async Task HandleAsync(GetNoteTypeRequest req, CancellationToken ct)
     {
         var noteType = await repository.GetByIdAsync(req.Id, ct);
-        
+
         if (noteType is null)
         {
             await SendNotFoundAsync(ct);

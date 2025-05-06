@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Notes.Application.NotesTypes.Create;
 
-namespace Notes.Application.NotesTypes.Create
+public record CreateNoteTypeRequest
 {
-    public record CreateNoteTypeRequest
-    {
-        public required string Name { get; set; }
-        public string? Description { get; set; }
-    }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
 }

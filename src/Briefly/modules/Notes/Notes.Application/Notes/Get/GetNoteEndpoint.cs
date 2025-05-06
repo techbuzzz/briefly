@@ -22,7 +22,6 @@ public class GetNoteEndpoint(
 
     public override async Task HandleAsync(GetNoteRequest req, CancellationToken ct)
     {
-
         var spec = new GetNoteSpecs(req.Id);
         var note = await repository.FirstOrDefaultAsync(spec, ct);
 
@@ -51,8 +50,6 @@ public class GetNoteEndpoint(
 
         await SendAsync(response, cancellation: ct);
     }
-
-   
 }
 
 public class GetNoteSpecs : Specification<Note, GetNoteResponse>

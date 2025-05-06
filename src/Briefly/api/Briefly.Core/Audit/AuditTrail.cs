@@ -1,4 +1,5 @@
 ﻿namespace Briefly.Core.Audit;
+
 public class AuditTrail
 {
     public Guid Id { get; set; }

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Briefly.Core.Audit;
 using Briefly.Core.Persistence;
 using Briefly.Infrastructure.Persistence;
 using FastEndpoints;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;

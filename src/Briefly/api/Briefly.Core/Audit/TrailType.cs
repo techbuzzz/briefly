@@ -1,4 +1,5 @@
 ﻿namespace Briefly.Core.Audit;
+
 public enum TrailType
 {
     None = 0,

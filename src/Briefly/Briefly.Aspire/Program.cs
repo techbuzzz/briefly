@@ -1,3 +1,5 @@
+using Projects;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("briefly-platform-db")
@@ -8,10 +10,11 @@ var postgres = builder.AddPostgres("briefly-platform-db")
 // Configure Redis using Aspire's AddRedis method
 var redis = builder.AddRedis("briefly-platform-cache");
 
-builder.AddProject<Projects.Briefly_Server>("briefly-server")
+builder.AddProject<Briefly_Server>("briefly-server")
     .WithReference(postgres)
     .WithReference(redis)
     .WaitFor(postgres)
-    .WaitFor(redis); ;
+    .WaitFor(redis);
+;
 
 builder.Build().Run();

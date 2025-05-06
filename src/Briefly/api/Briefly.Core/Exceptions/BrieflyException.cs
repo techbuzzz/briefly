@@ -1,13 +1,11 @@
 ﻿using System.Net;
 
 namespace Briefly.Core.Exceptions;
+
 public class BrieflyException : Exception
 {
-    public IEnumerable<string> ErrorMessages { get; }
-
-    public HttpStatusCode StatusCode { get; }
-
-    public BrieflyException(string message, IEnumerable<string> errors, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
+    public BrieflyException(string message, IEnumerable<string> errors,
+        HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         : base(message)
     {
         ErrorMessages = errors;
@@ -18,4 +16,8 @@ public class BrieflyException : Exception
     {
         ErrorMessages = new List<string>();
     }
+
+    public IEnumerable<string> ErrorMessages { get; }
+
+    public HttpStatusCode StatusCode { get; }
 }
