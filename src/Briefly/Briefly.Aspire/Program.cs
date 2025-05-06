@@ -18,7 +18,7 @@ var server = builder.AddProject<Briefly_Server>("briefly-server")
     .WaitFor(postgres)
     .WaitFor(redis);
 
-// builder.AddProject<Briefly_Client>("briefly-client")
-//     .WaitFor(server);
+builder.AddProject<Briefly_Client>("briefly-wasm")
+    .WaitFor(server);
 
 builder.Build().Run();
