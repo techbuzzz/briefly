@@ -1,7 +1,209 @@
 ﻿@page "/"
+@using Briefly.Client.Models
+@using Briefly.Client.Services
+@inject NotesService NotesService
+@inject NoteTypesService NoteTypesService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard - Briefly</PageTitle>
 
-<h1>Hello, world!</h1>
+<FluentGrid>
+    <FluentGridItem xs="12">
+        <FluentCard>
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentIcon Value="@(new Icons.Regular.Size32.DocumentText())" Color="Color.Accent" />
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                    <FluentText Typography="Typography.H2">Welcome to Briefly</FluentText>
+                    <FluentText Typography="Typography.Body">
+                        Your personal note-taking and organization platform
+                    </FluentText>
+                </FluentStack>
+            </FluentStack>
+        </FluentCard>
+    </FluentGridItem>
+</FluentGrid>
 
-Welcome to your new Fluent Blazor app.
+<FluentGrid style="margin-top: 24px;">
+    <FluentGridItem xs="12" md="6">
+        <FluentCard>
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                    <FluentIcon Value="@(new Icons.Regular.Size24.DocumentBulletList())" Color="Color.Accent" />
+                    <FluentText Typography="Typography.H5">Recent Notes</FluentText>
+                    <FluentSpacer />
+                    <FluentButton Appearance="Appearance.Lightweight" 
+                                 IconStart="@(new Icons.Regular.Size16.ArrowRight())"
+                                 @onclick="() => NavigateToNotes()">
+                        View All
+                    </FluentButton>
+                </FluentStack>
+                
+                @if (isLoadingNotes)
+                {
+                    <FluentProgressRing />
+                }
+                else if (recentNotes.Any())
+                {
+                    @foreach (var note in recentNotes)
+                    {
+                        <FluentCard style="background: var(--neutral-layer-2);">
+                            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                                <FluentIcon Value="@(new Icons.Regular.Size16.Document())" Color="Color.Neutral" />
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                                    <FluentText Typography="Typography.Body" Weight="FontWeight.SemiBold">
+                                        @note.Title
+                                    </FluentText>
+                                    <FluentText Typography="Typography.Caption">
+                                        @note.CreatedAt.ToString("MMM dd, yyyy")
+                                    </FluentText>
+                                </FluentStack>
+                            </FluentStack>
+                        </FluentCard>
+                    }
+                }
+                else
+                {
+                    <FluentEmptyState IconSize="48px" 
+                                     Icon="@(new Icons.Regular.Size48.DocumentAdd())"
+                                     Title="No notes yet"
+                                     Description="Create your first note to get started">
+                        <FluentButton Appearance="Appearance.Accent" 
+                                     IconStart="@(new Icons.Regular.Size16.Add())"
+                                     @onclick="() => NavigateToCreateNote()">
+                            Create Note
+                        </FluentButton>
+                    </FluentEmptyState>
+                }
+            </FluentStack>
+        </FluentCard>
+    </FluentGridItem>
+
+    <FluentGridItem xs="12" md="6">
+        <FluentCard>
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                    <FluentIcon Value="@(new Icons.Regular.Size24.Settings())" Color="Color.Accent" />
+                    <FluentText Typography="Typography.H5">Note Types</FluentText>
+                    <FluentSpacer />
+                    <FluentButton Appearance="Appearance.Lightweight" 
+                                 IconStart="@(new Icons.Regular.Size16.ArrowRight())"
+                                 @onclick="() => NavigateToNoteTypes()">
+                        Manage
+                    </FluentButton>
+                </FluentStack>
+                
+                @if (isLoadingNoteTypes)
+                {
+                    <FluentProgressRing />
+                }
+                else if (noteTypes.Any())
+                {
+                    @foreach (var noteType in noteTypes)
+                    {
+                        <FluentCard style="background: var(--neutral-layer-2);">
+                            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                                <FluentIcon Value="@(new Icons.Regular.Size16.DocumentSettings())" Color="Color.Neutral" />
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                                    <FluentText Typography="Typography.Body" Weight="FontWeight.SemiBold">
+                                        @noteType.Name
+                                    </FluentText>
+                                    @if (!string.IsNullOrEmpty(noteType.Description))
+                                    {
+                                        <FluentText Typography="Typography.Caption">
+                                            @noteType.Description
+                                        </FluentText>
+                                    }
+                                </FluentStack>
+                                <FluentSpacer />
+                                <FluentBadge Appearance="@(noteType.IsActive ? Appearance.Accent : Appearance.Neutral)">
+                                    @(noteType.IsActive ? "Active" : "Inactive")
+                                </FluentBadge>
+                            </FluentStack>
+                        </FluentCard>
+                    }
+                }
+                else
+                {
+                    <FluentEmptyState IconSize="48px" 
+                                     Icon="@(new Icons.Regular.Size48.DocumentAdd())"
+                                     Title="No note types"
+                                     Description="Create note types to organize your notes">
+                        <FluentButton Appearance="Appearance.Accent" 
+                                     IconStart="@(new Icons.Regular.Size16.Add())"
+                                     @onclick="() => NavigateToCreateNoteType()">
+                            Create Type
+                        </FluentButton>
+                    </FluentEmptyState>
+                }
+            </FluentStack>
+        </FluentCard>
+    </FluentGridItem>
+</FluentGrid>
+
+@code {
+    private List<NoteDto> recentNotes = new();
+    private List<NoteTypeDto> noteTypes = new();
+    private bool isLoadingNotes = true;
+    private bool isLoadingNoteTypes = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRecentNotes();
+        await LoadNoteTypes();
+    }
+
+    private async Task LoadRecentNotes()
+    {
+        try
+        {
+            isLoadingNotes = true;
+            var response = await NotesService.GetNotesAsync(new PaginationRequest { Page = 1, PageSize = 5 });
+            recentNotes = response.Notes;
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoadingNotes = false;
+        }
+    }
+
+    private async Task LoadNoteTypes()
+    {
+        try
+        {
+            isLoadingNoteTypes = true;
+            var response = await NoteTypesService.GetNoteTypesAsync(new PaginationRequest { Page = 1, PageSize = 10 });
+            noteTypes = response.NoteTypes;
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoadingNoteTypes = false;
+        }
+    }
+
+    private void NavigateToNotes()
+    {
+        // Navigation will be implemented
+    }
+
+    private void NavigateToCreateNote()
+    {
+        // Navigation will be implemented
+    }
+
+    private void NavigateToNoteTypes()
+    {
+        // Navigation will be implemented
+    }
+
+    private void NavigateToCreateNoteType()
+    {
+        // Navigation will be implemented
+    }
+}

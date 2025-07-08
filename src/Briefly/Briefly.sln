@@ -25,9 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notes", "Notes", "{7C1C3E2D-3DAE-49E4-AE35-FB21642F6BB4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migrations", "migrations", "{BDE90B55-8A0E-4DF2-B4A0-D637D1CFC9F9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Briefly.Migrations", "migrations\Briefly.Migrations\Briefly.Migrations.csproj", "{3FEFA5BC-625D-4DE6-984E-4CE05F0AD4C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Briefly.Migrations", "Briefly.Migrations\Briefly.Migrations.csproj", "{3FEFA5BC-625D-4DE6-984E-4CE05F0AD4C9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F7C35FFC-D20A-4063-9EA8-C2A8A3E2136B}"
 	ProjectSection(SolutionItems) = preProject
@@ -39,6 +37,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Briefly.Client.Infrastructure", "app\Briefly.Client.Infrastructure\Briefly.Client.Infrastructure.csproj", "{51EFC537-AA32-432A-8390-4CFAD9EBE306}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Briefly.Client", "app\Briefly.Client\Briefly.Client.csproj", "{E8C99072-F80A-412C-A27D-4B37321D1E57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "migrations", "migrations", "{874601E9-60C8-482C-9D9C-08E6A752C522}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{E61C27C7-0BC0-44FF-BEF7-DA89DC7B52C3}"
+	ProjectSection(SolutionItems) = preProject
+		nswag-regen.ps1 = nswag-regen.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,9 +98,10 @@ Global
 		{3435C395-66FB-4A1E-8B5A-662B6AC89C1A} = {7C1C3E2D-3DAE-49E4-AE35-FB21642F6BB4}
 		{01F80011-B1AF-460D-A247-A5AE09B4A2F2} = {9A1229CB-6E00-452F-863A-E724B4ED757D}
 		{7C1C3E2D-3DAE-49E4-AE35-FB21642F6BB4} = {2D7881DE-0FEC-40FB-8872-91DE770379D8}
-		{3FEFA5BC-625D-4DE6-984E-4CE05F0AD4C9} = {BDE90B55-8A0E-4DF2-B4A0-D637D1CFC9F9}
+		{3FEFA5BC-625D-4DE6-984E-4CE05F0AD4C9} = {874601E9-60C8-482C-9D9C-08E6A752C522}
 		{51EFC537-AA32-432A-8390-4CFAD9EBE306} = {2BB1790D-C3C7-4A45-80E8-E5FB24179477}
 		{E8C99072-F80A-412C-A27D-4B37321D1E57} = {2BB1790D-C3C7-4A45-80E8-E5FB24179477}
+		{E61C27C7-0BC0-44FF-BEF7-DA89DC7B52C3} = {2BB1790D-C3C7-4A45-80E8-E5FB24179477}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9209C87A-EA86-4A28-AF6A-9FA591901F91}

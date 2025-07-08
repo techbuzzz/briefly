@@ -1,0 +1,93 @@
+@page "/note-types/create"
+@using Briefly.Client.Models
+@using Briefly.Client.Services
+@inject NoteTypesService NoteTypesService
+@inject NavigationManager Navigation
+
+<PageTitle>Create Note Type - Briefly</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.DocumentText())" Color="Color.Accent" />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                <FluentText Typography="Typography.H3">Create Note Type</FluentText>
+                <FluentText Typography="Typography.Body">
+                    Create a new note type to organize your notes
+                </FluentText>
+            </FluentStack>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                <FluentTextField @bind-Value="request.Name" 
+                                Label="Name" 
+                                Required="true"
+                                Placeholder="Enter note type name..."
+                                style="width: 100%;" />
+                
+                <FluentTextArea @bind-Value="request.Description" 
+                               Label="Description" 
+                               Placeholder="Enter description (optional)..."
+                               Rows="3"
+                               style="width: 100%;" />
+                
+                <FluentSwitch @bind-Value="request.IsActive" 
+                             Label="Active" />
+            </FluentStack>
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentSpacer />
+                <FluentButton Appearance="Appearance.Stealth" 
+                             IconStart="@(new Icons.Regular.Size16.ArrowLeft())"
+                             @onclick="GoBack">
+                    Cancel
+                </FluentButton>
+                <FluentButton Appearance="Appearance.Accent" 
+                             IconStart="@(new Icons.Regular.Size16.Save())"
+                             @onclick="CreateNoteTypeAsync"
+                             Loading="@isCreating"
+                             Disabled="@(isCreating || string.IsNullOrWhiteSpace(request.Name))">
+                    Create Note Type
+                </FluentButton>
+            </FluentStack>
+        </FluentStack>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private CreateNoteTypeRequest request = new() { IsActive = true };
+    private bool isCreating = false;
+
+    private async Task CreateNoteTypeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return;
+
+        try
+        {
+            isCreating = true;
+            var createdNoteType = await NoteTypesService.CreateNoteTypeAsync(request);
+            
+            if (createdNoteType != null)
+            {
+                Navigation.NavigateTo("/note-types");
+            }
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/note-types");
+    }
+}

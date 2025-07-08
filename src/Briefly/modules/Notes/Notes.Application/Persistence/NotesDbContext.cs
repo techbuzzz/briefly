@@ -1,5 +1,6 @@
 ﻿using Briefly.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Options;
 using Notes.Application.Domain;
 using Shared.Constants;
@@ -24,3 +25,4 @@ public class NotesDbContext : DbContext
         modelBuilder.HasDefaultSchema(SchemaNames.Note);
     }
 }
+

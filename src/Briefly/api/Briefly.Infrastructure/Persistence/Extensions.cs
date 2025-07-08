@@ -42,6 +42,7 @@ public static class Extensions
                     config.ConnectionString);
             });
 
+        builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditInterceptor>();
 
         return builder;
