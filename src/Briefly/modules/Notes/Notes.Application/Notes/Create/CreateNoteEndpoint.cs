@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notes.Application.Domain;
 using Notes.Application.Domain.Events;
+using System.Text.Json;
 
 namespace Notes.Application.Notes.Create;
 
@@ -35,17 +36,9 @@ public class CreateNoteEndpoint(
         var note = new Note
         {
             Id = Guid.NewGuid(),
-            // AuthorName = req.AuthorName,
-            // AuthorEmail = req.AuthorEmail,
             NoteTypeId = req.NoteTypeId,
-            // Date = req.Date,
-            // Mood = req.Mood,
-            // Energy = req.Energy,
-            // Feeling = req.Feeling,
-            // Summary = req.Summary,
-            // HtmlContent = req.HtmlContent,
-            // RawData = req.RawData,
-            CreatedAt = DateTime.UtcNow
+            Title = req.Title,
+            CustomFields = JsonDocument.Parse(req.CustomFields.GetRawText())
         };
 
         note.QueueDomainEvent(new NoteCreated { Note = note });

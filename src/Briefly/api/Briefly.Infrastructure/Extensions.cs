@@ -15,126 +15,126 @@ namespace Briefly.Infrastructure;
 
 public static class Extensions
 {
-    public static WebApplicationBuilder ConfigureBrieflyInfrastructure(this WebApplicationBuilder builder)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        //builder.Services.AddFastEndpoints(options =>
-        //{
-        //    options.Assemblies = [typeof(AppMetaData).Assembly];
-        //});
+   public static WebApplicationBuilder ConfigureBrieflyInfrastructure(this WebApplicationBuilder builder)
+   {
+      ArgumentNullException.ThrowIfNull(builder);
+      //builder.Services.AddFastEndpoints(options =>
+      //{
+      //    options.Assemblies = [typeof(AppMetaData).Assembly];
+      //});
 
-        var pgConnectionString = builder.Configuration.GetConnectionString("briefly-platform-db");
-        var cacheConnectionString = builder.Configuration.GetConnectionString("briefly-platform-cache");
-        //builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("DatabaseOptions"));
+      var pgConnectionString = builder.Configuration.GetConnectionString("briefly-platform-db");
+      var cacheConnectionString = builder.Configuration.GetConnectionString("briefly-platform-cache");
+      //builder.Services.Configure<DatabaseOptions>(builder.Configuration.GetSection("DatabaseOptions"));
 
-        if (string.IsNullOrEmpty(pgConnectionString))
-            throw new Exception("PostgreSQL connection string is not configured.");
-        //if (string.IsNullOrEmpty(cacheConnectionString))
-        //    throw new Exception("Redis connection string is not configured.");
+      if (string.IsNullOrEmpty(pgConnectionString))
+         throw new Exception("PostgreSQL connection string is not configured.");
+      //if (string.IsNullOrEmpty(cacheConnectionString))
+      //    throw new Exception("Redis connection string is not configured.");
 
-        // builder.Services.AddTransient<IAuditService, AuditService>();
-
-
-        builder.Services.Configure<DatabaseOptions>(options =>
-        {
-            builder.Configuration.GetSection("DatabaseOptions").Bind(options);
-            options.ConnectionString = pgConnectionString; // Set the PostgreSQL connection string
-        });
-
-        // Configure Entity Framework Core with PostgreSQL
-        // builder.Services.AddDbContext<NotesDbContext>(options =>
-        //     options.UseNpgsql(pgConnectionString, b => b.MigrationsAssembly(typeof(MigrationsMetaData).Assembly.GetName().Name)));
-
-        // Configure Entity Framework Core with DB Server
-        builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = cacheConnectionString; });
-        // Configure FusionCache with Redis
-        builder.Services.AddFusionCache().AsHybridCache()
-            .WithDefaultEntryOptions(new FusionCacheEntryOptions
-            {
-                Duration = TimeSpan.FromMinutes(5),
-                IsFailSafeEnabled = true,
-                FailSafeMaxDuration = TimeSpan.FromMinutes(10),
-                FailSafeThrottleDuration = TimeSpan.FromSeconds(30),
-                FactorySoftTimeout = TimeSpan.FromMilliseconds(100),
-                FactoryHardTimeout = TimeSpan.FromMilliseconds(1500)
-            })
-            .WithSerializer(new FusionCacheNewtonsoftJsonSerializer())
-            .WithDistributedCache(sp => sp.GetRequiredService<IDistributedCache>());
-
-        // Add Swagger services
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Briefly API",
-                Version = "v1",
-                Description = "API documentation for Briefly platform"
-            });
-        });
-
-        // Add services to the container.
-        builder.Services.AddAuthorization();
-
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-        return builder;
-    }
-
-    public static async Task<WebApplication> UseBrieflyFramework(this WebApplication app)
-    {
-        ArgumentNullException.ThrowIfNull(app);
-
-        app.UseFastEndpoints(c =>
-        {
-            c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-            c.Endpoints.RoutePrefix = "api";
-        });
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment()) app.MapOpenApi();
-
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-
-        // Enable Swagger middleware
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Briefly API v1");
-            c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
-        });
+      // builder.Services.AddTransient<IAuditService, AuditService>();
 
 
-        app.SetupDatabases();
+      builder.Services.Configure<DatabaseOptions>(options =>
+      {
+         builder.Configuration.GetSection("DatabaseOptions").Bind(options);
+         options.ConnectionString = pgConnectionString; // Set the PostgreSQL connection string
+      });
 
-        // Apply pending migrations automatically
-        // using (var scope = app.Services.CreateScope())
-        // {
-        //     var dbContext = scope.ServiceProvider.GetRequiredService<NotesDbContext>();
-        //     dbContext.Database.Migrate();
-        // }
+      // Configure Entity Framework Core with PostgreSQL
+      // builder.Services.AddDbContext<NotesDbContext>(options =>
+      //     options.UseNpgsql(pgConnectionString, b => b.MigrationsAssembly(typeof(MigrationsMetaData).Assembly.GetName().Name)));
 
-        // Resolve and invoke IDbInitializer to apply migrations
-        // using (var scope = app.Services.CreateScope())
-        // {
-        //     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-        //     await dbInitializer.MigrateAsync(CancellationToken.None);
-        // }
+      // Configure Entity Framework Core with DB Server
+      builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = cacheConnectionString; });
+      // Configure FusionCache with Redis
+      builder.Services.AddFusionCache().AsHybridCache()
+          .WithDefaultEntryOptions(new FusionCacheEntryOptions
+          {
+             Duration = TimeSpan.FromMinutes(5),
+             IsFailSafeEnabled = true,
+             FailSafeMaxDuration = TimeSpan.FromMinutes(10),
+             FailSafeThrottleDuration = TimeSpan.FromSeconds(30),
+             FactorySoftTimeout = TimeSpan.FromMilliseconds(100),
+             FactoryHardTimeout = TimeSpan.FromMilliseconds(1500)
+          })
+          .WithSerializer(new FusionCacheNewtonsoftJsonSerializer())
+          .WithDistributedCache(sp => sp.GetRequiredService<IDistributedCache>());
 
-        return app;
-    }
+      // Add Swagger services
+      builder.Services.AddEndpointsApiExplorer();
+      builder.Services.AddSwaggerGen(c =>
+      {
+         c.SwaggerDoc("v1", new OpenApiInfo
+         {
+            Title = "Briefly API",
+            Version = "v1",
+            Description = "API documentation for Briefly platform"
+         });
+      });
 
-    private static void SetupDatabases(this IApplicationBuilder app)
-    {
-        using var scope = app.ApplicationServices.CreateScope();
-        
-        var initializers = scope.ServiceProvider.GetServices<IDbInitializer>();
-        foreach (var initializer in initializers)
-        {
-            initializer.MigrateAsync(CancellationToken.None).Wait();
-            initializer.SeedAsync(CancellationToken.None).Wait();
-        }
-    }
+      // Add services to the container.
+      builder.Services.AddAuthorization();
+      builder.ConfigureDatabase();
+      // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+      builder.Services.AddOpenApi();
+      return builder;
+   }
+
+   public static async Task<WebApplication> UseBrieflyFramework(this WebApplication app)
+   {
+      ArgumentNullException.ThrowIfNull(app);
+
+      app.UseFastEndpoints(c =>
+      {
+         c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+         c.Endpoints.RoutePrefix = "api";
+      });
+
+      // Configure the HTTP request pipeline.
+      if (app.Environment.IsDevelopment()) app.MapOpenApi();
+
+      app.UseHttpsRedirection();
+
+      app.UseAuthorization();
+
+      // Enable Swagger middleware
+      app.UseSwagger();
+      app.UseSwaggerUI(c =>
+      {
+         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Briefly API v1");
+         c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+      });
+
+
+      app.SetupDatabases();
+
+      // Apply pending migrations automatically
+      // using (var scope = app.Services.CreateScope())
+      // {
+      //     var dbContext = scope.ServiceProvider.GetRequiredService<NotesDbContext>();
+      //     dbContext.Database.Migrate();
+      // }
+
+      // Resolve and invoke IDbInitializer to apply migrations
+      // using (var scope = app.Services.CreateScope())
+      // {
+      //     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+      //     await dbInitializer.MigrateAsync(CancellationToken.None);
+      // }
+
+      return app;
+   }
+
+   private static void SetupDatabases(this IApplicationBuilder app)
+   {
+      using var scope = app.ApplicationServices.CreateScope();
+
+      var initializers = scope.ServiceProvider.GetServices<IDbInitializer>();
+      foreach (var initializer in initializers)
+      {
+         initializer.MigrateAsync(CancellationToken.None).Wait();
+         initializer.SeedAsync(CancellationToken.None).Wait();
+      }
+   }
 }

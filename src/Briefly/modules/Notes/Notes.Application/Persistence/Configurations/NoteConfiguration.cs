@@ -14,6 +14,5 @@ public class NoteConfiguration : IEntityTypeConfiguration<Note>
         builder.HasOne(x => x.NoteType)
             .WithMany()
             .HasForeignKey(x => x.NoteTypeId);
-        builder.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
     }
 }
