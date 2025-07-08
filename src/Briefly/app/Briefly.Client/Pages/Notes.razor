@@ -3,6 +3,7 @@
 @using Briefly.Client.Services
 @inject NotesService NotesService
 @inject NoteTypesService NoteTypesService
+@inject NavigationManager Navigation
 
 <PageTitle>Notes - Briefly</PageTitle>
 
@@ -203,7 +204,7 @@
 
     private void CreateNewNote()
     {
-        // Navigate to create note page
+        Navigation.NavigateTo("/notes/create");
     }
 
     private void EditNote(Guid noteId)

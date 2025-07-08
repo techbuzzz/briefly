@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <FluentLayout>
     <FluentHeader>
@@ -55,8 +56,7 @@
 @code {
     private void CreateNewNote()
     {
-        // Navigate to create note page
-        // This will be implemented when we create the navigation service
+        Navigation.NavigateTo("/notes/create");
     }
 }
 

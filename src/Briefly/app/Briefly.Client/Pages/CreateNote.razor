@@ -1,0 +1,267 @@
+@page "/notes/create"
+@using Briefly.Client.Models
+@using Briefly.Client.Services
+@inject NotesService NotesService
+@inject NoteTypesService NoteTypesService
+@inject NavigationManager Navigation
+
+<PageTitle>Create Note - Briefly</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.DocumentText())" Color="Color.Accent" />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                <FluentText Typography="Typography.H3">Create Note</FluentText>
+                <FluentText Typography="Typography.Body">
+                    Create a new note to capture your thoughts and ideas
+                </FluentText>
+            </FluentStack>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                <FluentTextField @bind-Value="request.Title" 
+                                Label="Title" 
+                                Required="true"
+                                Placeholder="Enter note title..."
+                                style="width: 100%;" />
+                
+                <FluentSelect TOption="string" 
+                             @bind-Value="selectedNoteTypeId" 
+                             Label="Note Type" 
+                             Required="true"
+                             @onchange="OnNoteTypeChanged"
+                             style="width: 100%;">
+                    <FluentOption TOption="string" Value="" Disabled="true">Select a note type...</FluentOption>
+                    @foreach (var noteType in availableNoteTypes)
+                    {
+                        <FluentOption TOption="string" Value="@noteType.Id.ToString()">@noteType.Name</FluentOption>
+                    }
+                </FluentSelect>
+
+                @if (selectedNoteType != null && selectedNoteType.FieldDefinitions.Any())
+                {
+                    <FluentDivider />
+                    <FluentText Typography="Typography.H6">Custom Fields</FluentText>
+                    
+                    @foreach (var field in selectedNoteType.FieldDefinitions.OrderBy(f => f.DisplayOrder))
+                    {
+                        <div>
+                            @if (field.DataType == FieldDataType.Text || field.DataType == FieldDataType.Email || field.DataType == FieldDataType.Url)
+                            {
+                                <FluentTextField @bind-Value="textFieldValues[field.Name]" 
+                                                Label="@field.Label" 
+                                                Required="@field.IsRequired"
+                                                Placeholder="@($"Enter {field.Label.ToLower()}...")"
+                                                style="width: 100%;" />
+                            }
+                            else if (field.DataType == FieldDataType.TextArea)
+                            {
+                                <FluentTextArea @bind-Value="textFieldValues[field.Name]" 
+                                               Label="@field.Label" 
+                                               Required="@field.IsRequired"
+                                               Placeholder="@($"Enter {field.Label.ToLower()}...")"
+                                               Rows="3"
+                                               style="width: 100%;" />
+                            }
+                            else if (field.DataType == FieldDataType.Number)
+                            {
+                                <FluentNumberField @bind-Value="numberFieldValues[field.Name]" 
+                                                  Label="@field.Label" 
+                                                  Required="@field.IsRequired"
+                                                  style="width: 100%;" />
+                            }
+                            else if (field.DataType == FieldDataType.Boolean)
+                            {
+                                <FluentSwitch @bind-Value="boolFieldValues[field.Name]" 
+                                             Label="@field.Label" />
+                            }
+                            else if (field.DataType == FieldDataType.Date)
+                            {
+                                <FluentDatePicker @bind-Value="dateFieldValues[field.Name]" 
+                                                 Label="@field.Label" 
+                                                 Required="@field.IsRequired"
+                                                 style="width: 100%;" />
+                            }
+                            else if (field.DataType == FieldDataType.Select)
+                            {
+                                <FluentSelect TOption="string" 
+                                             @bind-Value="textFieldValues[field.Name]" 
+                                             Label="@field.Label" 
+                                             Required="@field.IsRequired"
+                                             style="width: 100%;">
+                                    @if (!field.IsRequired)
+                                    {
+                                        <FluentOption TOption="string" Value="">-- Select an option --</FluentOption>
+                                    }
+                                    @foreach (var option in field.Options.OrderBy(o => o.DisplayOrder))
+                                    {
+                                        <FluentOption TOption="string" Value="@option.Value">@option.Label</FluentOption>
+                                    }
+                                </FluentSelect>
+                            }
+                        </div>
+                    }
+                }
+            </FluentStack>
+
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentSpacer />
+                <FluentButton Appearance="Appearance.Stealth" 
+                             IconStart="@(new Icons.Regular.Size16.ArrowLeft())"
+                             @onclick="GoBack">
+                    Cancel
+                </FluentButton>
+                <FluentButton Appearance="Appearance.Accent" 
+                             IconStart="@(new Icons.Regular.Size16.Save())"
+                             @onclick="CreateNoteAsync"
+                             Loading="@isCreating"
+                             Disabled="@(isCreating || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrEmpty(selectedNoteTypeId))">
+                    Create Note
+                </FluentButton>
+            </FluentStack>
+        </FluentStack>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private CreateNoteRequest request = new();
+    private List<NoteTypeDto> availableNoteTypes = [];
+    private NoteTypeDto? selectedNoteType;
+    private string selectedNoteTypeId = "";
+    private Dictionary<string, string> textFieldValues = [];
+    private Dictionary<string, double> numberFieldValues = [];
+    private Dictionary<string, bool> boolFieldValues = [];
+    private Dictionary<string, DateTime?> dateFieldValues = [];
+    private bool isCreating = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNoteTypes();
+    }
+
+    private async Task LoadNoteTypes()
+    {
+        try
+        {
+            var response = await NoteTypesService.GetNoteTypesAsync(new PaginationRequest { Page = 1, PageSize = 100 });
+            availableNoteTypes = response.NoteTypes.Where(nt => nt.IsActive).ToList();
+        }
+        catch
+        {
+            // Handle error
+        }
+    }
+
+    private async Task OnNoteTypeChanged(ChangeEventArgs e)
+    {
+        selectedNoteTypeId = e.Value?.ToString() ?? "";
+        
+        if (Guid.TryParse(selectedNoteTypeId, out var noteTypeId))
+        {
+            request.NoteTypeId = noteTypeId;
+            selectedNoteType = availableNoteTypes.FirstOrDefault(nt => nt.Id == noteTypeId);
+            
+            // Clear and initialize field values
+            textFieldValues.Clear();
+            numberFieldValues.Clear();
+            boolFieldValues.Clear();
+            dateFieldValues.Clear();
+            
+            if (selectedNoteType != null)
+            {
+                foreach (var field in selectedNoteType.FieldDefinitions)
+                {
+                    switch (field.DataType)
+                    {
+                        case FieldDataType.Text:
+                        case FieldDataType.TextArea:
+                        case FieldDataType.Email:
+                        case FieldDataType.Url:
+                        case FieldDataType.Select:
+                            textFieldValues[field.Name] = field.DefaultValue ?? "";
+                            break;
+                        case FieldDataType.Number:
+                            numberFieldValues[field.Name] = double.TryParse(field.DefaultValue, out var numVal) ? numVal : 0;
+                            break;
+                        case FieldDataType.Boolean:
+                            boolFieldValues[field.Name] = bool.TryParse(field.DefaultValue, out var boolVal) ? boolVal : false;
+                            break;
+                        case FieldDataType.Date:
+                            dateFieldValues[field.Name] = DateTime.TryParse(field.DefaultValue, out var dateVal) ? dateVal : DateTime.Today;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task CreateNoteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrEmpty(selectedNoteTypeId))
+            return;
+
+        try
+        {
+            isCreating = true;
+            
+            // Build custom fields dictionary
+            var customFields = new Dictionary<string, object>();
+            
+            if (selectedNoteType != null)
+            {
+                foreach (var field in selectedNoteType.FieldDefinitions)
+                {
+                    switch (field.DataType)
+                    {
+                        case FieldDataType.Text:
+                        case FieldDataType.TextArea:
+                        case FieldDataType.Email:
+                        case FieldDataType.Url:
+                        case FieldDataType.Select:
+                            if (textFieldValues.ContainsKey(field.Name))
+                                customFields[field.Name] = textFieldValues[field.Name];
+                            break;
+                        case FieldDataType.Number:
+                            if (numberFieldValues.ContainsKey(field.Name))
+                                customFields[field.Name] = numberFieldValues[field.Name];
+                            break;
+                        case FieldDataType.Boolean:
+                            if (boolFieldValues.ContainsKey(field.Name))
+                                customFields[field.Name] = boolFieldValues[field.Name];
+                            break;
+                        case FieldDataType.Date:
+                            if (dateFieldValues.ContainsKey(field.Name))
+                                customFields[field.Name] = dateFieldValues[field.Name];
+                            break;
+                    }
+                }
+            }
+            
+            request.CustomFields = customFields;
+            
+            var createdNote = await NotesService.CreateNoteAsync(request);
+            
+            if (createdNote != null)
+            {
+                Navigation.NavigateTo("/notes");
+            }
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isCreating = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/notes");
+    }
+}
