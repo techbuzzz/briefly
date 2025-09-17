@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints" Version="6.2.0" />
+    <PackageReference Include="FastEndpoints.Generator" Version="6.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.2" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.6" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.3.0" />
+    <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Briefly.Core\Briefly.Core.csproj" />
+  </ItemGroup>
+
+</Project>

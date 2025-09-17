@@ -1,0 +1,74 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<FluentLayout>
+    <FluentHeader>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size24.DocumentText())" Color="Color.Accent" />
+            <FluentText Typography="Typography.H4" style="margin-left: 8px; color: var(--accent-fill-rest);">
+                Briefly
+            </FluentText>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Outline" 
+                         IconEnd="@(new Icons.Regular.Size16.Add())"
+                         @onclick="CreateNewNote">
+                New Note
+            </FluentButton>
+        </FluentStack>
+    </FluentHeader>
+    
+    <FluentStack Class="main" Orientation="Orientation.Horizontal" Width="100%">
+        <NavMenu />
+        <FluentBodyContent Class="body-content">
+            <ErrorBoundary>
+                <ChildContent>
+                    <div class="content">
+                        @Body
+                    </div>
+                </ChildContent>
+                <ErrorContent Context="exception">
+                    <div class="error-message">
+                        <FluentIcon Value="@(new Icons.Regular.Size16.ErrorCircle())" />
+                        <span>An error occurred: @exception.Message</span>
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </FluentBodyContent>
+    </FluentStack>
+    
+    <FluentFooter>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+            <FluentText Typography="Typography.Body">
+                <FluentAnchor Href="https://www.fluentui-blazor.net" Target="_blank">
+                    Fluent UI Blazor
+                </FluentAnchor>
+            </FluentText>
+            <FluentSpacer />
+            <FluentText Typography="Typography.Body">
+                <FluentAnchor Href="https://learn.microsoft.com/en-us/aspnet/core/blazor" Target="_blank">
+                    About Blazor
+                </FluentAnchor>
+            </FluentText>
+        </FluentStack>
+    </FluentFooter>
+</FluentLayout>
+
+@code {
+    private void CreateNewNote()
+    {
+        Navigation.NavigateTo("/notes/create");
+    }
+}
+
+<style>
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background-color: #fed7d7;
+        border: 1px solid #fc8181;
+        border-radius: 4px;
+        color: #c53030;
+    }
+</style>

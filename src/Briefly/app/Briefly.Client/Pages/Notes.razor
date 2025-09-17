@@ -1,0 +1,224 @@
+@page "/notes"
+@using Briefly.Client.Models
+@using Briefly.Client.Services
+@inject NotesService NotesService
+@inject NoteTypesService NoteTypesService
+@inject NavigationManager Navigation
+
+<PageTitle>Notes - Briefly</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size32.TextBulletListSquare())" Color="Color.Accent" />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                <FluentText Typography="Typography.H3">Notes</FluentText>
+                <FluentText Typography="Typography.Body">
+                    Manage all your notes in one place
+                </FluentText>
+            </FluentStack>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Accent" 
+                         IconStart="@(new Icons.Regular.Size16.Add())"
+                         @onclick="CreateNewNote">
+                Create Note
+            </FluentButton>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentSearch @bind-Value="searchTerm" 
+                             @onchange="OnSearchChanged"
+                             Placeholder="Search notes..." 
+                             style="min-width: 300px;" />
+                <FluentSpacer />
+                <FluentText Typography="Typography.Body">
+                    Showing @filteredNotes.Count of @totalCount notes
+                </FluentText>
+            </FluentStack>
+
+            @if (isLoading)
+            {
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+                    <FluentProgressRing />
+                    <FluentText Typography="Typography.Body">Loading notes...</FluentText>
+                </FluentStack>
+            }
+            else if (filteredNotes.Any())
+            {
+                <FluentDataGrid Items="@filteredNotes.AsQueryable()" 
+                               TGridItem="NoteDto" 
+                               GridTemplateColumns="1fr 200px 150px 120px">
+                    <PropertyColumn Property="@(n => n.Title)" 
+                                   Title="Title" 
+                                   Sortable="true">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Document())" Color="Color.Accent" />
+                        </ColumnOptions>
+                    </PropertyColumn>
+                    
+                    <TemplateColumn Title="Note Type">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.DocumentSettings())" Color="Color.Accent" />
+                        </ColumnOptions>
+                        <ChildContent>
+                            @{
+                                var noteType = noteTypes.FirstOrDefault(nt => nt.Id == context.NoteTypeId);
+                                var typeName = noteType?.Name ?? "Unknown";
+                            }
+                            <FluentBadge Appearance="Appearance.Neutral">@typeName</FluentBadge>
+                        </ChildContent>
+                    </TemplateColumn>
+                    
+                    <PropertyColumn Property="@(n => n.CreatedAt)" 
+                                   Title="Created" 
+                                   Sortable="true"
+                                   Format="MMM dd, yyyy" />
+                    
+                    <TemplateColumn Title="Actions">
+                        <ChildContent>
+                            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="8">
+                                <FluentButton Appearance="Appearance.Lightweight" 
+                                             IconStart="@(new Icons.Regular.Size16.Edit())"
+                                             @onclick="() => EditNote(context.Id)">
+                                    Edit
+                                </FluentButton>
+                                <FluentButton Appearance="Appearance.Lightweight" 
+                                             IconStart="@(new Icons.Regular.Size16.Delete())"
+                                             @onclick="() => DeleteNote(context.Id)">
+                                    Delete
+                                </FluentButton>
+                            </FluentStack>
+                        </ChildContent>
+                    </TemplateColumn>
+                </FluentDataGrid>
+
+                <FluentPaginator Value="@currentPage" 
+                                Count="@totalPages" 
+                                OnCurrentPageIndexChanged="OnPageChanged" />
+            }
+            else
+            {
+                <FluentEmptyState IconSize="64px" 
+                                 Icon="@(new Icons.Regular.Size48.DocumentAdd())"
+                                 Title="No notes found"
+                                 Description="@(string.IsNullOrEmpty(searchTerm) ? "Create your first note to get started" : $"No notes match '{searchTerm}'")">
+                    @if (string.IsNullOrEmpty(searchTerm))
+                    {
+                        <FluentButton Appearance="Appearance.Accent" 
+                                     IconStart="@(new Icons.Regular.Size16.Add())"
+                                     @onclick="CreateNewNote">
+                            Create Note
+                        </FluentButton>
+                    }
+                    else
+                    {
+                        <FluentButton Appearance="Appearance.Lightweight" 
+                                     IconStart="@(new Icons.Regular.Size16.Dismiss())"
+                                     @onclick="ClearSearch">
+                            Clear Search
+                        </FluentButton>
+                    }
+                </FluentEmptyState>
+            }
+        </FluentStack>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private List<NoteDto> filteredNotes = new();
+    private List<NoteTypeDto> noteTypes = new();
+    private string searchTerm = string.Empty;
+    private int currentPage = 1;
+    private int totalCount = 0;
+    private int totalPages = 0;
+    private bool isLoading = true;
+    private const int pageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNoteTypes();
+        await LoadNotes();
+    }
+
+    private async Task LoadNotes()
+    {
+        try
+        {
+            isLoading = true;
+            var response = await NotesService.GetNotesAsync(new PaginationRequest 
+            { 
+                Page = currentPage, 
+                PageSize = pageSize,
+                SearchTerm = searchTerm
+            });
+            
+            filteredNotes = response.Notes;
+            totalCount = response.TotalCount;
+            totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadNoteTypes()
+    {
+        try
+        {
+            var response = await NoteTypesService.GetNoteTypesAsync(new PaginationRequest { Page = 1, PageSize = 100 });
+            noteTypes = response.NoteTypes;
+        }
+        catch
+        {
+            // Handle error
+        }
+    }
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        await LoadNotes();
+    }
+
+    private async Task OnPageChanged(int newPage)
+    {
+        currentPage = newPage;
+        await LoadNotes();
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        currentPage = 1;
+        await LoadNotes();
+    }
+
+    private void CreateNewNote()
+    {
+        Navigation.NavigateTo("/notes/create");
+    }
+
+    private void EditNote(Guid noteId)
+    {
+        // Navigate to edit note page
+    }
+
+    private async Task DeleteNote(Guid noteId)
+    {
+        // Show confirmation dialog and delete
+        var success = await NotesService.DeleteNoteAsync(noteId);
+        if (success)
+        {
+            await LoadNotes();
+        }
+    }
+}

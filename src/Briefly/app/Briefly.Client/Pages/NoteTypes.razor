@@ -1,0 +1,219 @@
+@page "/note-types"
+@using Briefly.Client.Models
+@using Briefly.Client.Services
+@inject NoteTypesService NoteTypesService
+
+<PageTitle>Note Types - Briefly</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="24">
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+            <FluentIcon Value="@(new Icons.Regular.Size32.Settings())" Color="Color.Accent" />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="4">
+                <FluentText Typography="Typography.H3">Note Types</FluentText>
+                <FluentText Typography="Typography.Body">
+                    Manage and organize your note types
+                </FluentText>
+            </FluentStack>
+            <FluentSpacer />
+            <FluentButton Appearance="Appearance.Accent" 
+                         IconStart="@(new Icons.Regular.Size16.Add())"
+                         @onclick="CreateNewNoteType">
+                Create Note Type
+            </FluentButton>
+        </FluentStack>
+    </FluentCard>
+
+    <FluentCard>
+        <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+                <FluentSearch @bind-Value="searchTerm" 
+                             @onchange="OnSearchChanged"
+                             Placeholder="Search note types..." 
+                             style="min-width: 300px;" />
+                <FluentSpacer />
+                <FluentText Typography="Typography.Body">
+                    Showing @filteredNoteTypes.Count of @totalCount note types
+                </FluentText>
+            </FluentStack>
+
+            @if (isLoading)
+            {
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+                    <FluentProgressRing />
+                    <FluentText Typography="Typography.Body">Loading note types...</FluentText>
+                </FluentStack>
+            }
+            else if (filteredNoteTypes.Any())
+            {
+                <FluentDataGrid Items="@filteredNoteTypes.AsQueryable()" 
+                               TGridItem="NoteTypeDto" 
+                               GridTemplateColumns="1fr 2fr 150px 100px 150px">
+                    <PropertyColumn Property="@(nt => nt.Name)" 
+                                   Title="Name" 
+                                   Sortable="true">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.DocumentSettings())" Color="Color.Accent" />
+                        </ColumnOptions>
+                    </PropertyColumn>
+                    
+                    <PropertyColumn Property="@(nt => nt.Description)" 
+                                   Title="Description" 
+                                   Sortable="true">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.Info())" Color="Color.Accent" />
+                        </ColumnOptions>
+                    </PropertyColumn>
+                    
+                    <TemplateColumn Title="Fields">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.New())" Color="Color.Accent" />
+                        </ColumnOptions>
+                        <ChildContent>
+                            <FluentBadge Appearance="Appearance.Neutral">
+                                @context.FieldDefinitions.Count fields
+                            </FluentBadge>
+                        </ChildContent>
+                    </TemplateColumn>
+                    
+                    <TemplateColumn Title="Status">
+                        <ColumnOptions>
+                            <FluentIcon Value="@(new Icons.Regular.Size16.CheckmarkCircle())" Color="Color.Accent" />
+                        </ColumnOptions>
+                        <ChildContent>
+                            <FluentBadge Appearance="@(context.IsActive ? Appearance.Accent : Appearance.Neutral)">
+                                @(context.IsActive ? "Active" : "Inactive")
+                            </FluentBadge>
+                        </ChildContent>
+                    </TemplateColumn>
+                    
+                    <TemplateColumn Title="Actions">
+                        <ChildContent>
+                            <FluentStack Orientation="Orientation.Horizontal" VerticalGap="8">
+                                <FluentButton Appearance="Appearance.Lightweight" 
+                                             IconStart="@(new Icons.Regular.Size16.Edit())"
+                                             @onclick="() => EditNoteType(context.Id)">
+                                    Edit
+                                </FluentButton>
+                                <FluentButton Appearance="Appearance.Lightweight" 
+                                             IconStart="@(new Icons.Regular.Size16.Delete())"
+                                             @onclick="() => DeleteNoteType(context.Id)">
+                                    Delete
+                                </FluentButton>
+                            </FluentStack>
+                        </ChildContent>
+                    </TemplateColumn>
+                </FluentDataGrid>
+
+                <FluentPaginator Value="@currentPage" 
+                                Count="@totalPages" 
+                                OnCurrentPageIndexChanged="OnPageChanged" />
+            }
+            else
+            {
+                <FluentEmptyState IconSize="64px" 
+                                 Icon="@(new Icons.Regular.Size48.DocumentAdd())"
+                                 Title="No note types found"
+                                 Description="@(string.IsNullOrEmpty(searchTerm) ? "Create your first note type to get started" : $"No note types match '{searchTerm}'")">
+                    @if (string.IsNullOrEmpty(searchTerm))
+                    {
+                        <FluentButton Appearance="Appearance.Accent" 
+                                     IconStart="@(new Icons.Regular.Size16.Add())"
+                                     @onclick="CreateNewNoteType">
+                            Create Note Type
+                        </FluentButton>
+                    }
+                    else
+                    {
+                        <FluentButton Appearance="Appearance.Lightweight" 
+                                     IconStart="@(new Icons.Regular.Size16.Dismiss())"
+                                     @onclick="ClearSearch">
+                            Clear Search
+                        </FluentButton>
+                    }
+                </FluentEmptyState>
+            }
+        </FluentStack>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private List<NoteTypeDto> filteredNoteTypes = new();
+    private string searchTerm = string.Empty;
+    private int currentPage = 1;
+    private int totalCount = 0;
+    private int totalPages = 0;
+    private bool isLoading = true;
+    private const int pageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNoteTypes();
+    }
+
+    private async Task LoadNoteTypes()
+    {
+        try
+        {
+            isLoading = true;
+            var response = await NoteTypesService.GetNoteTypesAsync(new PaginationRequest 
+            { 
+                Page = currentPage, 
+                PageSize = pageSize,
+                SearchTerm = searchTerm
+            });
+            
+            filteredNoteTypes = response.NoteTypes;
+            totalCount = response.TotalCount;
+            totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+        }
+        catch
+        {
+            // Handle error
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        await LoadNoteTypes();
+    }
+
+    private async Task OnPageChanged(int newPage)
+    {
+        currentPage = newPage;
+        await LoadNoteTypes();
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        currentPage = 1;
+        await LoadNoteTypes();
+    }
+
+    private void CreateNewNoteType()
+    {
+        // Navigate to create note type page
+    }
+
+    private void EditNoteType(Guid noteTypeId)
+    {
+        // Navigate to edit note type page
+    }
+
+    private async Task DeleteNoteType(Guid noteTypeId)
+    {
+        // Show confirmation dialog and delete
+        var success = await NoteTypesService.DeleteNoteTypeAsync(noteTypeId);
+        if (success)
+        {
+            await LoadNoteTypes();
+        }
+    }
+}
